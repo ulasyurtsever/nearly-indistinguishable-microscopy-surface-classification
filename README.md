@@ -34,7 +34,30 @@ nearly-indistinguishable-microscopy-surface-classification/
 │       ├── centermask_and_gradcam_ci.py# equal-area centre-mask control + bootstrap CI
 │       └── specimen_bootstrap.py       # specimen-level (cluster) bootstrap of accuracy
 └── results/
-    ├── seed42/  seed7/  seed123/   # per-model predictions, classification reports, training logs, run info
+    ├── seed42/
+    │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
+    │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
+    │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
+    │   ├── run_info_PHASE1.json              # feature-extraction run metadata (versions, seed, timing)
+    │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
+    │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
+    │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
+    ├── seed7/
+    │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
+    │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
+    │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
+    │   ├── run_info_PHASE1.json              # feature-extraction run metadata (versions, seed, timing)
+    │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
+    │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
+    │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
+    ├── seed123/
+    │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
+    │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
+    │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
+    │   ├── run_info_PHASE1.json              # feature-extraction run metadata (versions, seed, timing)
+    │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
+    │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
+    │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
     ├── robustness_summary.csv
     ├── attention_border_summary.csv
     ├── robustness_centermask_summary.csv
@@ -42,6 +65,8 @@ nearly-indistinguishable-microscopy-surface-classification/
     ├── specimen_bootstrap_summary_seed42.csv
     └── predictions_with_specimen_seed42.csv
 ```
+
+In each seed folder, `<Model>` covers the eight architectures evaluated at the feature-extraction stage (LeNet-5, Custom_Modern_Net, ResNet50-Scratch, VGG16, VGG19, InceptionV3, EfficientNetB0, ResNet50) plus the two fine-tuned models (ResNet50_FINETUNED and EfficientNetB0_FINETUNED).
 
 ## Data and trained weights
 
