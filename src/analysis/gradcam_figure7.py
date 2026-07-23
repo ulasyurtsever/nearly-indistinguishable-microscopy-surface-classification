@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Figure 7 - derli toplu Grad-CAM bilesik figuru
+Figure 7 - composite Grad-CAM figure.
 ----------------------------------------------
-ResNet-50 ince ayarli model uzerinde, secili temsili ornekler icin tek bir
-yayina hazir Grad-CAM figuru uretir (Ingilizce etiketli).
+Produces a single publication-ready Grad-CAM figure over the fine-tuned
+ResNet-50 model for a set of representative examples.
 
-Satirlar (5):
-  1) Dogru siniflanan bir LDPE ornegi
-  2) LDPE olarak yanlis siniflanan bir uv-PE ornegi (karisikligi gosterir)
-  3) Dogru siniflanan bir oxo-PE ornegi (ayni aile, ama ayrisiyor)
-  4) Dogru siniflanan bir PVC ornegi (ayirt edici sinif)
-  5) Dogru siniflanan bir PP ornegi (ayirt edici sinif)
+Rows (5):
+  1) A correctly classified LDPE example
+  2) A uv-PE example misclassified as LDPE (illustrates the confusion)
+  3) A correctly classified oxo-PE example (same family, yet separated)
+  4) A correctly classified PVC example (distinct class)
+  5) A correctly classified PP example (distinct class)
 
-Calistirma (proje kok klasorunden):
-    python analiz_scriptleri/gradcam_figure7.py
+Usage (from the project root):
+    python analysis/gradcam_figure7.py
 
-Cikti: figure7.png ve figure7.pdf (calisilan klasorde)
+Output: figure7.png and figure7.pdf (in the working directory)
 """
 
 import os
@@ -26,11 +26,11 @@ import tensorflow as tf
 DATA_DIR = "data"
 SPLIT    = "test"
 IMG_SIZE = 224
-MODEL_YOLU = "weights/seed42/ResNet50_FINETUNED_best_model.h5"
-TARAMA_LIMITI = 80   # her sinifta en fazla kac ornek taransin
+MODEL_PATH = "weights/seed42/ResNet50_FINETUNED_best_model.h5"
+SCAN_LIMIT = 80   # max number of images scanned per class
 
-# Aranacak ornekler: (gercek sinif, istenen tahmin, satir etiketi)
-SECIMLER = [
+# Examples to find: (true class, desired prediction, row label)
+SELECTIONS = [
     ("LDPE",   "LDPE",   "LDPE  ->  LDPE  (correct)"),
     ("uv-PE",  "LDPE",   "uv-PE  ->  LDPE  (error)"),
     ("oxo-PE", "oxo-PE", "oxo-PE  ->  oxo-PE  (correct)"),
@@ -39,17 +39,17 @@ SECIMLER = [
 ]
 
 
-def sinif_listesi():
+def list_classes():
     p = os.path.join(DATA_DIR, SPLIT)
     return sorted([d for d in os.listdir(p) if os.path.isdir(os.path.join(p, d))])
 
 
-def goruntu_yukle(path):
+def load_image(path):
     img = tf.keras.utils.load_img(path, target_size=(IMG_SIZE, IMG_SIZE))
     return tf.keras.utils.img_to_array(img)
 
 
-def govde_bul(model):
+def find_backbone(model):
     for i, layer in enumerate(model.layers):
         if isinstance(layer, tf.keras.Model):
             if any(isinstance(l, tf.keras.layers.Conv2D) for l in layer.layers):
@@ -57,8 +57,8 @@ def govde_bul(model):
     return None, None
 
 
-def son_4b(govde):
-    for layer in reversed(govde.layers):
+def last_conv_layer(backbone):
+    for layer in reversed(backbone.layers):
         try:
             shp = layer.output_shape
         except Exception:
@@ -68,69 +68,69 @@ def son_4b(govde):
     return None
 
 
-def gradcam_kur(model):
-    idx, govde = govde_bul(model)
-    son_conv = son_4b(govde)
-    grad_govde = tf.keras.Model(govde.input, [son_conv.output, govde.output])
-    return grad_govde, model.layers[:idx], model.layers[idx + 1:]
+def build_gradcam(model):
+    idx, backbone = find_backbone(model)
+    last_conv = last_conv_layer(backbone)
+    grad_backbone = tf.keras.Model(backbone.input, [last_conv.output, backbone.output])
+    return grad_backbone, model.layers[:idx], model.layers[idx + 1:]
 
 
-def isi_haritasi(raw, grad_govde, onceki, sonraki):
+def heatmap(raw, grad_backbone, pre_layers, post_layers):
     x = raw
-    for L in onceki:
+    for L in pre_layers:
         x = L(x, training=False)
     with tf.GradientTape() as tape:
-        conv_out, govde_out = grad_govde(x)
+        conv_out, backbone_out = grad_backbone(x)
         tape.watch(conv_out)
-        y = govde_out
-        for L in sonraki:
+        y = backbone_out
+        for L in post_layers:
             y = L(y, training=False)
-        sinif = tf.argmax(y[0])
-        skor = y[:, sinif]
-    grads = tape.gradient(skor, conv_out)
-    agirlik = tf.reduce_mean(grads, axis=(0, 1, 2))
-    cam = tf.reduce_sum(conv_out[0] * agirlik, axis=-1)
+        cls = tf.argmax(y[0])
+        score = y[:, cls]
+    grads = tape.gradient(score, conv_out)
+    weights = tf.reduce_mean(grads, axis=(0, 1, 2))
+    cam = tf.reduce_sum(conv_out[0] * weights, axis=-1)
     cam = tf.maximum(cam, 0)
     cam = cam / (tf.reduce_max(cam) + 1e-8)
     cam = tf.image.resize(cam[..., None], (IMG_SIZE, IMG_SIZE))[..., 0]
-    return cam.numpy(), int(sinif.numpy())
+    return cam.numpy(), int(cls.numpy())
 
 
-def bindir(ham, cam):
-    taban = ham / 255.0
-    renkli = plt.get_cmap("jet")(cam)[..., :3]
-    return np.clip(0.55 * taban + 0.45 * renkli, 0, 1)
+def overlay(raw_img, cam):
+    base = raw_img / 255.0
+    colored = plt.get_cmap("jet")(cam)[..., :3]
+    return np.clip(0.55 * base + 0.45 * colored, 0, 1)
 
 
-def ornek_bul(gercek, istenen, siniflar, grad_govde, onceki, sonraki):
-    kdir = os.path.join(DATA_DIR, SPLIT, gercek)
-    for dosya in sorted(os.listdir(kdir))[:TARAMA_LIMITI]:
-        ham = goruntu_yukle(os.path.join(kdir, dosya))
-        cam, idx = isi_haritasi(np.expand_dims(ham.copy(), 0), grad_govde, onceki, sonraki)
-        if siniflar[idx] == istenen:
-            return ham, cam
-    # bulunamazsa ilk ornegi dondur
-    ham = goruntu_yukle(os.path.join(kdir, sorted(os.listdir(kdir))[0]))
-    cam, idx = isi_haritasi(np.expand_dims(ham.copy(), 0), grad_govde, onceki, sonraki)
-    print(f"  UYARI: {gercek}->{istenen} ornegi bulunamadi, ilk ornek kullanildi (tahmin: {siniflar[idx]})")
-    return ham, cam
+def find_example(true_cls, target, classes, grad_backbone, pre_layers, post_layers):
+    class_dir = os.path.join(DATA_DIR, SPLIT, true_cls)
+    for fname in sorted(os.listdir(class_dir))[:SCAN_LIMIT]:
+        raw_img = load_image(os.path.join(class_dir, fname))
+        cam, idx = heatmap(np.expand_dims(raw_img.copy(), 0), grad_backbone, pre_layers, post_layers)
+        if classes[idx] == target:
+            return raw_img, cam
+    # fall back to the first image if no match is found
+    raw_img = load_image(os.path.join(class_dir, sorted(os.listdir(class_dir))[0]))
+    cam, idx = heatmap(np.expand_dims(raw_img.copy(), 0), grad_backbone, pre_layers, post_layers)
+    print(f"  WARNING: no {true_cls}->{target} example found, using the first image (prediction: {classes[idx]})")
+    return raw_img, cam
 
 
 def main():
-    siniflar = sinif_listesi()
-    print("Sinif sirasi:", siniflar)
-    model = tf.keras.models.load_model(MODEL_YOLU, compile=False)
-    grad_govde, onceki, sonraki = gradcam_kur(model)
+    classes = list_classes()
+    print("Class order:", classes)
+    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+    grad_backbone, pre_layers, post_layers = build_gradcam(model)
 
-    n = len(SECIMLER)
+    n = len(SELECTIONS)
     fig, ax = plt.subplots(n, 2, figsize=(4.6, 1.85 * n))
-    for r, (gercek, istenen, etiket) in enumerate(SECIMLER):
-        ham, cam = ornek_bul(gercek, istenen, siniflar, grad_govde, onceki, sonraki)
-        ax[r, 0].imshow(ham.astype("uint8")); ax[r, 0].axis("off")
-        ax[r, 1].imshow(bindir(ham, cam));    ax[r, 1].axis("off")
-        ax[r, 0].set_ylabel(etiket, fontsize=9)
-        # sol panele satir etiketi (title yerine sol ust)
-        ax[r, 0].set_title(etiket, fontsize=9, loc="left")
+    for r, (true_cls, target, label) in enumerate(SELECTIONS):
+        raw_img, cam = find_example(true_cls, target, classes, grad_backbone, pre_layers, post_layers)
+        ax[r, 0].imshow(raw_img.astype("uint8")); ax[r, 0].axis("off")
+        ax[r, 1].imshow(overlay(raw_img, cam));   ax[r, 1].axis("off")
+        ax[r, 0].set_ylabel(label, fontsize=9)
+        # row label on the left panel (top-left instead of a centered title)
+        ax[r, 0].set_title(label, fontsize=9, loc="left")
         if r == 0:
             ax[r, 0].annotate("Input", xy=(0.5, 1.18), xycoords="axes fraction",
                               ha="center", fontsize=9)
@@ -141,7 +141,7 @@ def main():
     fig.savefig("figure7.png", dpi=300, bbox_inches="tight")
     fig.savefig("figure7.pdf", bbox_inches="tight")
     plt.close(fig)
-    print("kaydedildi: figure7.png / figure7.pdf")
+    print("saved: figure7.png / figure7.pdf")
 
 
 if __name__ == "__main__":
