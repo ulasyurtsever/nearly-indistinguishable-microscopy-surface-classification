@@ -78,7 +78,7 @@ To run the scripts that need them, place the files as follows (paths are configu
 at the top of each script):
 
 ```
-data/                                   # test/<class>/*.jpeg  (and train/, val/ for training)
+data/ # test/<class>/*.jpeg  (and train/, val/ for training)
 weights/seed42/ResNet50_FINETUNED_best_model.h5
 ```
 
