@@ -1,0 +1,6 @@
+perturbation,accuracy,delta_vs_baseline
+Baseline (no perturbation),0.9088,0.0000
+Corner/vignette masking,0.6051,-0.3037
+Illumination normalization,0.8880,-0.0208
+Contrast reduction (0.5x),0.7668,-0.1420
+Center crop (80%),0.8894,-0.0193

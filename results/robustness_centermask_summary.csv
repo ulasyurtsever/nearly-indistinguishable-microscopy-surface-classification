@@ -1,0 +1,4 @@
+perturbation,accuracy,delta_vs_baseline
+Baseline (none),0.9088,0.0000
+Corner/vignette mask,0.6051,-0.3037
+Center mask (equal area),0.7215,-0.1873

@@ -1,0 +1,6 @@
+group,mean_cam_border_fraction,n
+border_area_reference,0.5867,0
+all,0.5508,640
+correct,0.5542,614
+incorrect,0.4714,26
+LDPE_uvPE,0.5573,160
