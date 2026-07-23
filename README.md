@@ -1,4 +1,4 @@
-# Low-Contrast Microscopy Surface Classification
+# Nearly Indistinguishable Microscopy Surface Classification
 
 Code and per-run results for the paper **"Transfer Learning and Model Attention on
 Nearly Indistinguishable Optical-Microscopy Surfaces"** (manuscript currently under peer review).
@@ -22,7 +22,7 @@ to genuine visual similarity rather than to acquisition shortcuts.
 ## Repository layout
 
 ```
-low-contrast-microscopy-surface-classification/
+nearly-indistinguishable-microscopy-surface-classification/
 ├── src/
 │   ├── train_models.py            # two-stage, multi-seed training driver
 │   ├── train_models.ipynb         # notebook version of the same pipeline
