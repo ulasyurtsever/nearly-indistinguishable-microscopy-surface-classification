@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this code, please cite the associated paper."
 title: "Transfer Learning and Model Attention on Nearly Indistinguishable Optical-Microscopy Surfaces"
 authors:
-  - family-names: Yurtsever
-    given-names: Ulaş
   - family-names: Deliaslan
     given-names: Adem
+  - family-names: Yurtsever
+    given-names: Ulaş
 year: 2026
 notes: "Manuscript under review."
