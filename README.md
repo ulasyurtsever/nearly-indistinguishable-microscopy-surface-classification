@@ -34,7 +34,7 @@ nearly-indistinguishable-microscopy-surface-classification/
 │       ├── centermask_and_gradcam_ci.py# equal-area centre-mask control + bootstrap CI
 │       └── specimen_bootstrap.py       # specimen-level (cluster) bootstrap of accuracy
 └── results/
-    ├── seed42/
+    ├── seed42/                     # seed7/ and seed123/ mirror this structure
     │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
     │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
     │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
@@ -42,22 +42,8 @@ nearly-indistinguishable-microscopy-surface-classification/
     │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
     │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
     │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
-    ├── seed7/
-    │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
-    │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
-    │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
-    │   ├── run_info_PHASE1.json              # feature-extraction run metadata (versions, seed, timing)
-    │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
-    │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
-    │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
-    ├── seed123/
-    │   ├── <Model>_predictions.csv           # per-image true label, predicted label, class probabilities
-    │   ├── <Model>_classification_report.csv # per-class precision, recall, F1
-    │   ├── <Model>_training_log.csv          # per-epoch loss and accuracy
-    │   ├── run_info_PHASE1.json              # feature-extraction run metadata (versions, seed, timing)
-    │   ├── run_info_FINETUNED.json           # fine-tuning run metadata
-    │   ├── tum_modeller_karsilastirma_zscore_PHASE1.csv    # all-models summary, feature-extraction stage
-    │   └── tum_modeller_karsilastirma_zscore_FINETUNED.csv # all-models summary, fine-tuning stage
+    ├── seed7/                      # same layout as seed42/
+    ├── seed123/                    # same layout as seed42/
     ├── robustness_summary.csv
     ├── attention_border_summary.csv
     ├── robustness_centermask_summary.csv
@@ -78,7 +64,7 @@ To run the scripts that need them, place the files as follows (paths are configu
 at the top of each script):
 
 ```
-data/ # test/<class>/*.jpeg  (and train/, val/ for training)
+data/                                   # test/<class>/*.jpeg  (and train/, val/ for training)
 weights/seed42/ResNet50_FINETUNED_best_model.h5
 ```
 
