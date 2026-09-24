@@ -1,0 +1,31 @@
+{
+  "seed": 7,
+  "phase": "PHASE1",
+  "timestamp": "2026-07-21T20:03:35",
+  "tensorflow": "2.15.1",
+  "python": "3.10.20",
+  "gpus": [
+    "/physical_device:GPU:0"
+  ],
+  "img_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "epochs_phase1": 200,
+  "use_head_l2": false,
+  "l2_value": 0.001,
+  "optimizer": "AdamW",
+  "lr_feature_extraction": 0.0003,
+  "lr_fine_tuning": 1e-05,
+  "models": [
+    "LeNet-5",
+    "Custom_Modern_Net",
+    "ResNet50-Scratch",
+    "VGG16",
+    "VGG19",
+    "ResNet50",
+    "InceptionV3",
+    "EfficientNetB0"
+  ]
+}
