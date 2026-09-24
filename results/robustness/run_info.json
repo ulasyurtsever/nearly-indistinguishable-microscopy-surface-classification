@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-09-23T00:49:00",
+  "tensorflow": "2.15.1",
+  "python": "3.10.19",
+  "gpus": [
+    "/physical_device:GPU:0"
+  ],
+  "loader": "tf.keras.utils.image_dataset_from_directory(image_size=(224,224), bilinear, shuffle=False) -- same as training",
+  "seeds": [
+    42,
+    7,
+    123
+  ],
+  "n_test_images": 4811,
+  "classes": [
+    "LDPE",
+    "PLA",
+    "PP",
+    "PS",
+    "PVC",
+    "XPS",
+    "oxo-PE",
+    "uv-PE"
+  ],
+  "perturbations": [
+    "Baseline (none)",
+    "Illumination normalization",
+    "Center crop (80%)",
+    "Contrast reduction (0.5x)",
+    "Corner/vignette mask (global-mean fill)",
+    "Center mask (equal area)",
+    "Edge-midpoint mask (equal area, 4 patches)",
+    "Corner mask (local-mean fill)",
+    "Corners only (inverse mask)"
+  ],
+  "corner_mask_pixels": 10748,
+  "border_frac": 0.18,
+  "border_area_ref": 0.5867346938775511,
+  "cam_per_class": 80,
+  "n_boot": 2000,
+  "rng_seed": 42
+}

@@ -1,0 +1,10 @@
+perturbation,accuracy,delta_vs_baseline,n_images
+"Baseline (none)",0.9218,0.0000,4811
+"Illumination normalization",0.9104,-0.0114,4811
+"Center crop (80%)",0.8817,-0.0401,4811
+"Contrast reduction (0.5x)",0.7608,-0.1611,4811
+"Corner/vignette mask (global-mean fill)",0.6520,-0.2698,4811
+"Center mask (equal area)",0.8169,-0.1050,4811
+"Edge-midpoint mask (equal area, 4 patches)",0.6668,-0.2550,4811
+"Corner mask (local-mean fill)",0.6654,-0.2565,4811
+"Corners only (inverse mask)",0.1287,-0.7932,4811
